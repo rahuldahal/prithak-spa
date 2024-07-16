@@ -1,23 +1,18 @@
-import { Task } from '../model/task.model';
 import { Request, Response } from 'express';
+import { createTaskService } from '../services';
 import { Error as MongooseError } from 'mongoose';
 
 export async function createTask(req: Request, res: Response) {
   const { title, description, username } = req.body;
 
-  if (!title || !description || !username) {
-    return res.sendStatus(400);
-  }
-
-  const task = new Task({
-    title,
-    description,
-    username,
-  });
-
   try {
-    await task.save();
-    return res.status(201).json(task);
+    const createdTodo = await createTaskService({
+      title,
+      description,
+      username,
+    });
+
+    return res.status(201).json(createdTodo);
   } catch (error: MongooseError | any) {
     if (error instanceof MongooseError.ValidationError) {
       return res.status(400).json({ error: error.message });
