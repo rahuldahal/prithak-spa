@@ -2,7 +2,7 @@ import { Task } from '../model/task.model';
 import { CreateTaskDTO } from '../DTO/task.dto';
 import { Error as MongooseError } from 'mongoose';
 
-async function createTaskService(data: CreateTaskDTO) {
+async function createTask(data: CreateTaskDTO) {
   const task = new Task(data);
 
   try {
@@ -13,4 +13,4 @@ async function createTaskService(data: CreateTaskDTO) {
   }
 }
 
-export { createTaskService };
+export { createTask };
