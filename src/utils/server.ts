@@ -1,9 +1,12 @@
 import express from 'express';
+import router from '../routes/tasks.route';
 
 function createServer() {
   const app = express();
 
-  app.use((_, res) => res.sendStatus(200));
+  app.use(express.json());
+  app.use('/api/rest/v1', router);
+
   return app;
 }
 
