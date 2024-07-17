@@ -28,14 +28,28 @@ export async function createTaskHandler(
 }
 
 export async function getTasksHandler(
-  _: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const tasks = await getTasks();
+    if (!req.query) {
+      res.sendStatus(StatusCodes.BAD_REQUEST);
+    }
+
+    const { page = 1, limit = 10, sort = 'asc', search } = req.query;
+
+    const options = {
+      page: parseInt(page as string),
+      limit: parseInt(limit as string),
+      sort: String(sort),
+      search: search ? String(search) : undefined,
+    };
+
+    const tasks = await getTasks(options);
+
     return res.status(StatusCodes.OK).json(tasks);
-  } catch (error: MongooseError | any) {
+  } catch (error) {
     return next(error);
   }
 }

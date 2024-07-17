@@ -2,6 +2,13 @@ import { Task } from '../model/task.model';
 import { Error as MongooseError } from 'mongoose';
 import { CreateTaskDTO, UpdateTaskDTO } from '../DTO/task.dto';
 
+interface GetTasksOptions {
+  page: number;
+  limit: number;
+  sort: string;
+  search?: string;
+}
+
 async function createTask(data: CreateTaskDTO) {
   const task = new Task(data);
 
@@ -13,9 +20,22 @@ async function createTask(data: CreateTaskDTO) {
   }
 }
 
-async function getTasks() {
+async function getTasks(options: GetTasksOptions) {
   try {
-    const tasks = await Task.find();
+    let query = Task.find();
+    if (options.search) {
+      const regex = new RegExp(options.search, 'i');
+      query = query.find({ title: regex });
+    }
+
+    const skip = (options.page - 1) * options.limit;
+    query = query.skip(skip).limit(options.limit);
+
+    const sortOption = options.sort === 'asc' ? 'createdAt' : '-createdAt';
+    query = query.sort(sortOption);
+
+    const tasks = await query.exec();
+
     return tasks;
   } catch (error: MongooseError | any) {
     return error;
