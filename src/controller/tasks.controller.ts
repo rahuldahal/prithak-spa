@@ -1,8 +1,12 @@
+import { OBJECT_ID_REGEX } from '../constants';
 import { StatusCodes } from 'http-status-codes';
 import { Error as MongooseError } from 'mongoose';
-import { createTask, getTasks } from '../services';
 import { NextFunction, Request, Response } from 'express';
-import { CreateTaskInput } from '../validations/task.validation';
+import { createTask, getTasks, updateTask } from '../services';
+import {
+  CreateTaskInput,
+  UpdateTaskInput,
+} from '../validations/task.validation';
 
 export async function createTaskHandler(
   req: Request<{}, {}, CreateTaskInput['body']>,
@@ -31,6 +35,38 @@ export async function getTasksHandler(
   try {
     const tasks = await getTasks();
     return res.status(StatusCodes.OK).json(tasks);
+  } catch (error: MongooseError | any) {
+    return next(error);
+  }
+}
+
+export async function updateTaskHandler(
+  req: Request<{ id: string }, {}, UpdateTaskInput['body']>,
+  res: Response,
+  next: NextFunction,
+) {
+  const { params } = req;
+  if (params === undefined) {
+    return res.status(StatusCodes.BAD_REQUEST).end();
+  }
+
+  const { id } = params;
+  if (!id.match(OBJECT_ID_REGEX)) {
+    return res.status(StatusCodes.BAD_REQUEST).end();
+  }
+
+  const { title, description, completedAt } = req.body;
+
+  try {
+    const task = await updateTask(id, { title, description, completedAt });
+
+    if (!task) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: 'Task not found' });
+    }
+
+    return res.status(StatusCodes.OK).json(task);
   } catch (error: MongooseError | any) {
     return next(error);
   }
