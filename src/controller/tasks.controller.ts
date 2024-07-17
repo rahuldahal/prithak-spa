@@ -1,4 +1,4 @@
-import { OBJECT_ID_REGEX } from '../constants';
+import { OBJECT_ID_REGEX, ORDERS } from '../constants';
 import { StatusCodes } from 'http-status-codes';
 import { Error as MongooseError } from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
@@ -37,7 +37,7 @@ export async function getTasksHandler(
       res.sendStatus(StatusCodes.BAD_REQUEST);
     }
 
-    const { page = 1, limit = 10, sort = 'asc', search } = req.query;
+    const { page = 1, limit = 10, sort = ORDERS.ASC, search } = req.query;
 
     const options = {
       page: parseInt(page as string),
